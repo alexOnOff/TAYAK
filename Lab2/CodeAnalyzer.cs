@@ -1,6 +1,6 @@
 ﻿namespace Lab2;
 
-public class CodeAnalyzer : IAnalyzer
+internal class CodeAnalyzer : IAnalyzer
 {
     private List<char> _alphabet = new();
 

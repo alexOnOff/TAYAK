@@ -1,6 +1,6 @@
 ﻿namespace Lab2;
 
-public class TransitionFunction
+internal class TransitionFunction
 {
     public string   CurrentState;
     public char     Symbol;

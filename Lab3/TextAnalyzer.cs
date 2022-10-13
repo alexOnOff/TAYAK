@@ -1,6 +1,6 @@
 ﻿namespace Lab2;
 
-public class TextAnalyzer : IAnalyzer
+internal class TextAnalyzer : IAnalyzer
 {
     public bool IsAutomatDescriptionCorrect(List<string> inputLines)
     {

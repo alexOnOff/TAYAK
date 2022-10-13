@@ -6,7 +6,7 @@ public class Automate
     public List<char> Alphabet;
     public HashSet<string> FinallyStates = new HashSet<string>();
     public string StartState = "q0";
-    public List<TransitionFunction> TransitionFunctions;
+    List<TransitionFunction> TransitionFunctions;
     
 
     public Automate(List<string> fileLines, List<char> alphabet)
