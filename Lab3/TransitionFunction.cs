@@ -2,14 +2,14 @@
 
 internal class TransitionFunction
 {
-    string CurrentState;
-    char InputSymbol;
-    char StackSymbol;
+    public string CurrentState;
+    public string InputSymbol;
+    public string StackSymbol;
 
-    string NextState;
-    string StackOutputSymbols;
+    public string NextState;
+    public string StackOutputSymbols;
 
-    public TransitionFunction(string _curState, char _inpSymbol, char _stackSymbol, string _sextState, string _stackOutSymbols)
+    public TransitionFunction(string _curState, string _inpSymbol, string _stackSymbol, string _sextState, string _stackOutSymbols)
     {
         CurrentState = _curState;
         InputSymbol = _inpSymbol;
