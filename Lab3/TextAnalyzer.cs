@@ -1,4 +1,5 @@
-﻿namespace Lab2;
+﻿namespace Lab3;
+using Lab2;
 
 internal class TextAnalyzer : IAnalyzer
 {

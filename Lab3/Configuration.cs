@@ -1,4 +1,4 @@
-﻿namespace Lab2;
+﻿namespace Lab3;
 
 internal class Configuration
 {
