@@ -15,10 +15,20 @@ public partial class MainWindow : Window
     {
         var grammarAnalyzer = new GrammarAnalyzer(TB_Grammar.Text);
         TB_Console.Text = "";
-        foreach (var line in grammarAnalyzer.GetInputGrammarLines()) 
-            TB_Console.Text += line;
-       
-        
+        /* foreach (var line in grammarAnalyzer.GetInputGrammarLines()) 
+             TB_Console.Text += line;*/
+
+
+        if (!grammarAnalyzer.IsTextCorrect()) TB_Console.Text = "Incorrect grammar!";
+        else
+        {
+            AlphabetAnalyzer alphabetAnalyzer = new AlphabetAnalyzer(TB_Grammar.Text);
+            foreach(var str in alphabetAnalyzer.GetTerminalsAlphabet())
+            {
+                TB_Console.Text += str;
+                TB_Console.Text += '\n';
+            }
+        }
     }
 
     private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
