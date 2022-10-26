@@ -28,11 +28,20 @@ public partial class MainWindow : Window
                 TB_Console.Text += str;
                 TB_Console.Text += '\n';
             }
+            PusdownAutomat pusdownAutomat = CreatePA();
         }
     }
 
     private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
 
+    }
+
+    private PusdownAutomat CreatePA()
+    {
+        AlphabetAnalyzer alphabetAnalyzer = new AlphabetAnalyzer(TB_Grammar.Text);
+        PusdownAutomat PA = new(alphabetAnalyzer.GetNonTerminalsAlphabet(), alphabetAnalyzer.GetTerminalsAlphabet());
+
+        return PA;
     }
 }

@@ -1,31 +1,26 @@
-﻿namespace Lab4_5.Automat
+﻿using System.Collections.Generic;
+
+namespace Lab4_5.Automat
 {
     internal class TransitionFunction
     {
-        public string CurrentState;
-        public string InputSymbol;
-        public string StackSymbol;
 
-        public string NextState;
-        public string StackOutputSymbols;
+        private readonly string InputSymbol;
+        public string GetInputSymbol { get { return InputSymbol; } }
 
-        public TransitionFunction(string _curState, string _inpSymbol, string _stackSymbol, string _sextState, string _stackOutSymbols)
+        private readonly string NonTerminal;
+        public string GetNonTerminal { get { return NonTerminal; } }
+
+
+        private readonly List<string> StackOutput = new();
+        public List<string> GetStackOutput { get { return StackOutput; } }
+
+        public TransitionFunction( string _inpSymbol, string _stackSymbol, List<string> _stackOutSymbols)
         {
-            CurrentState = _curState;
             InputSymbol = _inpSymbol;
-            StackSymbol = _stackSymbol;
-            NextState = _sextState;
-            StackOutputSymbols = _stackOutSymbols;
+            NonTerminal = _stackSymbol;
+            StackOutput = _stackOutSymbols;
         }
 
-        public bool Equals(TransitionFunction transitionFunction2)
-        {
-            if (CurrentState == transitionFunction2.CurrentState &&
-                InputSymbol == transitionFunction2.InputSymbol &&
-                NextState == transitionFunction2.NextState &&
-                StackSymbol == transitionFunction2.StackSymbol &&
-                StackOutputSymbols == transitionFunction2.StackOutputSymbols) return true;
-            return false;
-        }
     }
 }
