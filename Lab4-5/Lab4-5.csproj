@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Folder Include="Examples\" />
+    <Folder Include="Interpreter\" />
   </ItemGroup>
 
 </Project>

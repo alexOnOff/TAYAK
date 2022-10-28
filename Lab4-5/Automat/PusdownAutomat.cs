@@ -10,12 +10,28 @@ internal class PusdownAutomat
     public Stack<string> Stack = new();
 
     public HashSet<TransitionFunction> TransitionFunctions = new();
+    public HashSet<GrammarRule> GrammarRules = new();
     public string _stackButton = "$";
 
     public PusdownAutomat(HashSet<string> alpabet, HashSet<string> stackAlphabet)
     {
         Alphabet = alpabet;
         StackAlphabet = stackAlphabet;
+    }
+
+    public PusdownAutomat(HashSet<string> alpabet, HashSet<string> stackAlphabet, string grammarText)
+    {
+        Alphabet = alpabet;
+        StackAlphabet = stackAlphabet;
+        SetGrammarRules(grammarText);
+    }
+
+    private HashSet<GrammarRule> SetGrammarRules(string grammarText)
+    {
+        HashSet<GrammarRule> GR = new();
+
+
+        return GR;
     }
 
 

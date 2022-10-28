@@ -15,11 +15,23 @@ namespace Lab4_5.Automat
         private readonly List<string> StackOutput = new();
         public List<string> GetStackOutput { get { return StackOutput; } }
 
+        private readonly bool IsSync;
+        public bool GetIsSync { get { return IsSync; } }
+
         public TransitionFunction( string _inpSymbol, string _stackSymbol, List<string> _stackOutSymbols)
         {
             InputSymbol = _inpSymbol;
             NonTerminal = _stackSymbol;
             StackOutput = _stackOutSymbols;
+            IsSync = false;
+        }
+
+        public TransitionFunction(bool isSync)
+        {
+            InputSymbol = null;
+            NonTerminal = null;
+            StackOutput = null;
+            IsSync = isSync;
         }
 
     }
