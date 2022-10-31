@@ -40,7 +40,7 @@ public partial class MainWindow : Window
     private PusdownAutomat CreatePA()
     {
         AlphabetAnalyzer alphabetAnalyzer = new AlphabetAnalyzer(TB_Grammar.Text);
-        PusdownAutomat PA = new(alphabetAnalyzer.GetNonTerminalsAlphabet(), alphabetAnalyzer.GetTerminalsAlphabet());
+        PusdownAutomat PA = new(alphabetAnalyzer.GetNonTerminalsAlphabet(), alphabetAnalyzer.GetTerminalsAlphabet(), TB_Grammar.Text);
 
         return PA;
     }
