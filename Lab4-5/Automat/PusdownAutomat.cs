@@ -127,9 +127,25 @@ internal class PusdownAutomat
         while (isChanged)
         {
             isChanged = false;
-            foreach (var gr in GrammarRules)
+
+            foreach (var gr in GrammarRules) // NEES FIX
             {
-                //if()
+                var firstStackOutput = gr.GetStackOutput()[0];
+                /*if (!firsts[gr.GetNonTerminal()].Contains(strs[0]) &&
+                       (TerminalsAlphabet.Contains(strs[0]) || strs[0] == " " || strs[0] == "~"))
+                {
+                    firsts[gr.GetNonTerminal()].Add(strs[0]);
+                }*/
+
+                if(firsts[gr.GetNonTerminal()].Contains(firstStackOutput) && NonTerminalsAlphabet.Contains(firstStackOutput) && firstStackOutput != "~")
+                {
+                    foreach(var term in firsts[firstStackOutput])
+                    {
+                        firsts[gr.GetNonTerminal()].Add(term);
+                    }
+                    isChanged = true;
+                }
+
             }
 
 
