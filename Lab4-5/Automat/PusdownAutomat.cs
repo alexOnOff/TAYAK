@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Lab4_5.Automat;
 
@@ -9,9 +10,14 @@ internal class PusdownAutomat
     public HashSet<string> TerminalsAlphabet = new();
     public Stack<string> Stack = new();
 
-    public HashSet<TransitionFunction> TransitionFunctions = new();
+    public HashSet<TransitionFunction> PredictAnalyzerTable = new();
     public HashSet<GrammarRule> GrammarRules = new();
     public string _stackButton = "$";
+
+    private readonly string _startNonTerminal = "E";
+
+    private Dictionary<string, HashSet<string>> First;
+    private Dictionary<string, HashSet<string>> Follow;
 
     public PusdownAutomat(HashSet<string> alpabet, HashSet<string> stackAlphabet)
     {
@@ -25,8 +31,10 @@ internal class PusdownAutomat
         TerminalsAlphabet = stackAlphabet;
         TerminalsAlphabet.Add("~");
         GrammarRules = SetGrammarRules(grammarText);
-        //TransitionFunctions = CreateAllErrorsTF();
-        Dictionary<string, HashSet<string>> first = First();
+
+        SetFirst();
+        SetFollow();
+        SetPredictAnalyzerTable();
     }
 
     private HashSet<GrammarRule> SetGrammarRules(string grammarText)
@@ -105,7 +113,7 @@ internal class PusdownAutomat
         return gr;
     }
 
-    private Dictionary<string, HashSet<string>> First()
+    private void SetFirst()
     {
         bool isChanged = true;
         Dictionary<string, HashSet<string>> firsts = new();
@@ -131,15 +139,60 @@ internal class PusdownAutomat
             }
         }
 
-        return firsts;
+        First = firsts;
     }
 
-    private Dictionary<string, HashSet<string>> Follow()
+    private void SetFollow()
     {
         Dictionary<string, HashSet<string>> follows = new();
+        bool isChanged = true;
 
-        return follows;
+        foreach (var gr in GrammarRules)
+            if (!follows.ContainsKey(gr.GetNonTerminal()))
+                follows.Add(gr.GetNonTerminal(), new HashSet<string>());
+
+        follows[_startNonTerminal].Add("$");
+
+        while(isChanged)
+        {
+            isChanged = false;
+
+            foreach (var gr in GrammarRules)
+            {
+                for (int i = 0; i < gr.GetStackOutput().Count; i++)
+                {
+                    if (TerminalsAlphabet.Contains(gr.GetStackOutput()[i])) continue;
+                    var prevLen = follows[gr.GetStackOutput()[i]].Count;
+
+                    HashSet<string> epsilon = new HashSet<string>() { "~" };
+
+
+                    if(i < gr.GetStackOutput().Count - 1)
+                    {
+                        if (NonTerminalsAlphabet.Contains(gr.GetStackOutput()[i + 1]))
+                        {
+                            follows[gr.GetStackOutput()[i]].UnionWith(First[gr.GetStackOutput()[i + 1]].Except(epsilon));
+
+                            if (First[gr.GetStackOutput()[i + 1]].Contains("~"))
+                                follows[gr.GetStackOutput()[i]].UnionWith(follows[gr.GetNonTerminal()]);
+                        }
+                        else if (TerminalsAlphabet.Contains(gr.GetStackOutput()[i + 1]))
+                            follows[gr.GetStackOutput()[i]].Add(gr.GetStackOutput()[i + 1]);
+                    }
+                    else
+                        follows[gr.GetStackOutput()[i]].UnionWith(follows[gr.GetNonTerminal()]);
+
+                    if (follows[gr.GetStackOutput()[i]].Count != prevLen) isChanged = true;
+                }
+            }
+        }
+
+        Follow = follows;
+    }
+  
+    private void SetPredictAnalyzerTable()
+    {
+
+
     }
 }
-
-
