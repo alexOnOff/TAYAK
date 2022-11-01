@@ -23,14 +23,16 @@ internal class PusdownAutomat
     {
         NonTerminalsAlphabet = alpabet;
         TerminalsAlphabet = stackAlphabet;
+        TerminalsAlphabet.Add("~");
         GrammarRules = SetGrammarRules(grammarText);
         //TransitionFunctions = CreateAllErrorsTF();
-        Dictionary<string, List<string>> first = First();
+        Dictionary<string, HashSet<string>> first = First();
     }
 
     private HashSet<GrammarRule> SetGrammarRules(string grammarText)
     {
         HashSet<GrammarRule> GRs = new();
+        
 
         var grammars = grammarText.Split("\r\n");
 
@@ -55,7 +57,7 @@ internal class PusdownAutomat
         GrammarRule gr = new GrammarRule(leftPart);
 
         if(rightPart.Length == 0)
-            gr.AddNonterminalRule("~");
+            gr.AddStackRule("~");
         
 
         string curSymbols = "";
@@ -67,7 +69,7 @@ internal class PusdownAutomat
             {
                 if (rightPart[i] == '’')
                 {
-                    gr.AddNonterminalRule(curSymbols);
+                    gr.AddStackRule(curSymbols);
                     curSymbols = "";
                     isNonTerminal = isTerminal = false;
                 }
@@ -80,7 +82,7 @@ internal class PusdownAutomat
             {
                 if (rightPart[i] == '>')
                 {
-                    gr.AddNonterminalRule(curSymbols);
+                    gr.AddStackRule(curSymbols);
                     curSymbols = "";
                     isNonTerminal = isTerminal = false;
                 }
@@ -96,64 +98,48 @@ internal class PusdownAutomat
                 else if (rightPart[i] == '<')
                     isNonTerminal = true;
                 else if ((rightPart[i] == ' '))
-                    gr.AddNonterminalRule(" ");
+                    gr.AddStackRule(" ");
             }
         }
 
         return gr;
     }
 
-    private Dictionary<string, List<string>> First()
+    private Dictionary<string, HashSet<string>> First()
     {
-        Dictionary<string, List<string>> firsts = new();
-        foreach(var gr in GrammarRules)
-        {
-            if(!firsts.ContainsKey(gr.GetNonTerminal()))
-            {
-                firsts.Add(gr.GetNonTerminal(),new List<string>());
-            }
-
-            var strs = gr.GetStackOutput();
-            if (!firsts[gr.GetNonTerminal()].Contains(strs[0]) &&
-                   (TerminalsAlphabet.Contains(strs[0]) || strs[0] == " " || strs[0] == "~"))
-            {
-                firsts[gr.GetNonTerminal()].Add(strs[0]);
-            }
-
-        }
-
         bool isChanged = true;
+        Dictionary<string, HashSet<string>> firsts = new();
+
+        foreach(var gr in GrammarRules)
+            if(!firsts.ContainsKey(gr.GetNonTerminal()))
+                firsts.Add(gr.GetNonTerminal(),new HashSet<string>());
 
         while (isChanged)
         {
             isChanged = false;
 
-            foreach (var gr in GrammarRules) // NEES FIX
+            foreach (var gr in GrammarRules) 
             {
-                var firstStackOutput = gr.GetStackOutput()[0];
-                /*if (!firsts[gr.GetNonTerminal()].Contains(strs[0]) &&
-                       (TerminalsAlphabet.Contains(strs[0]) || strs[0] == " " || strs[0] == "~"))
-                {
-                    firsts[gr.GetNonTerminal()].Add(strs[0]);
-                }*/
+                var prevLen = firsts[gr.GetNonTerminal()].Count;
 
-                if(firsts[gr.GetNonTerminal()].Contains(firstStackOutput) && NonTerminalsAlphabet.Contains(firstStackOutput) && firstStackOutput != "~")
-                {
-                    foreach(var term in firsts[firstStackOutput])
-                    {
-                        firsts[gr.GetNonTerminal()].Add(term);
-                    }
-                    isChanged = true;
-                }
-
+                if (NonTerminalsAlphabet.Contains(gr.GetStackOutput()[0]) )
+                    firsts[gr.GetNonTerminal()].UnionWith(firsts[gr.GetStackOutput()[0]]);
+                else if(TerminalsAlphabet.Contains(gr.GetStackOutput()[0]))
+                    firsts[gr.GetNonTerminal()].Add(gr.GetStackOutput()[0]);
+                
+                if (prevLen != firsts[gr.GetNonTerminal()].Count) isChanged = true;
             }
-
-
         }
 
         return firsts;
     }
 
+    private Dictionary<string, HashSet<string>> Follow()
+    {
+        Dictionary<string, HashSet<string>> follows = new();
+
+        return follows;
+    }
 }
 
 

@@ -25,7 +25,7 @@ internal class GrammarRule
         StackOutput = stackOutput;
     }
 
-    public void AddNonterminalRule(string str)
+    public void AddStackRule(string str)
     {
         StackOutput.Add(str);
     }
