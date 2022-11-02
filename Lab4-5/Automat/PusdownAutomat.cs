@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Lab4_5.Analyzer;
+
 
 namespace Lab4_5.Automat;
 
@@ -30,7 +32,11 @@ internal class PusdownAutomat
         NonTerminalsAlphabet = alpabet;
         TerminalsAlphabet = stackAlphabet;
         TerminalsAlphabet.Add("~");
+        TerminalsAlphabet.Add(" ");
         GrammarRules = SetGrammarRules(grammarText);
+        Stack = new();
+        Stack.Push(_stackButton);
+        Stack.Push(_startNonTerminal);
 
         SetFirst();
         SetFollow();
@@ -242,9 +248,97 @@ internal class PusdownAutomat
             {
                 if (PredictAnalyzerTable.Where(pa => pa.GetNonTerminal == nonTerm && pa.GetInputSymbol == term).Count() == 0)
                 {
-                    PredictAnalyzerTable.Add(new TransitionFunction(term, nonTerm, true));
+                    PredictAnalyzerTable.Add(new TransitionFunction(nonTerm, term, true));
                 }
             }
         }
+    }
+
+    public ErrorAnalyzer Execute(string inputLine)
+    { 
+        ErrorAnalyzer errorAnalyzer = new ErrorAnalyzer();
+        inputLine += "$";
+        var posCounter = 0;
+        //var curStackSymbol;
+
+        while (inputLine.Length != 0)
+        {
+            var curStackSymbol = Stack.Pop();
+            var curInput = SelectInputSubstring(inputLine);
+            var tf = PredictAnalyzerTable.Where(pa => pa.GetInputSymbol == curInput && pa.GetNonTerminal == curStackSymbol);
+            if(tf.Count() == 1)
+            {
+                if(tf.First().GetIsSync)
+                {
+                    errorAnalyzer.AddErrorPlace(0, posCounter);
+                    inputLine = inputLine.Remove(0, curInput.Length);
+                    posCounter += curInput.Length;
+                    Stack.Push(curStackSymbol);
+                }
+                else
+                {
+                    var stackOutput = tf.First().GetStackOutput;
+
+                    //curStackSymbol = Stack.Pop();
+                    for (int i = stackOutput.Count() - 1; i >= 0 ; i--)
+                    {
+                        if (stackOutput[i] == "~") break;
+                        Stack.Push(stackOutput[i]);
+                    }
+                }
+            }
+            else if(curStackSymbol == curInput)
+            {
+                inputLine = inputLine.Remove(0, curInput.Length);
+                posCounter += curInput.Length;
+            }
+            else if(tf.Count() == 0)
+            {
+                errorAnalyzer.AddErrorPlace(0, posCounter);
+                return errorAnalyzer;
+            }
+            else if(tf.Count() > 1)
+            {
+                System.Console.WriteLine("THERE ARE TOO MANY TFs");
+                errorAnalyzer.AddErrorPlace(0, posCounter);
+                return errorAnalyzer;
+            }
+
+           /* if(inputLine[0].ToString() == _stackButton && curStackSymbol == _stackButton)
+            {
+                break;
+            }*/
+        }
+
+
+
+        return errorAnalyzer;
+    }
+
+    private string SelectInputSubstring(string input)
+    {
+        //ar len = 1;
+        bool isEntry = false;
+
+        for (int i = 1; i < input.Length; i++)
+        {
+            var curSub = input.Substring(0, i);
+            var count = TerminalsAlphabet.Where(ta => ta.StartsWith(curSub)).Count();
+
+
+            if (count == 1 && TerminalsAlphabet.Contains(curSub))
+            {
+                return curSub;
+            }
+            else if (count > 0)
+            {
+                isEntry = true;
+            }
+            else if (count == 0 && isEntry)
+            {
+                return input.Substring(0, i - 1);
+            }
+        }
+        return input;
     }
 }
