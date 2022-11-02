@@ -35,6 +35,7 @@ internal class PusdownAutomat
         SetFirst();
         SetFollow();
         SetPredictAnalyzerTable();
+        AddSync();
     }
 
     private HashSet<GrammarRule> SetGrammarRules(string grammarText)
@@ -192,7 +193,58 @@ internal class PusdownAutomat
   
     private void SetPredictAnalyzerTable()
     {
+        foreach(var gr in GrammarRules)
+        {
+            var firstItem = gr.GetStackOutput()[0];
+            if (NonTerminalsAlphabet.Contains(firstItem))
+            {
+                foreach(var term in First[firstItem])
+                {
+                    if (term == "~") continue;
+                    PredictAnalyzerTable.Add(new TransitionFunction(gr.GetNonTerminal(), term, gr.GetStackOutput()));
+                }
 
+                if(First[firstItem].Contains("~"))
+                {
+                    foreach(var termFollow in Follow[gr.GetNonTerminal()])
+                    {
+                        PredictAnalyzerTable.Add(new TransitionFunction(gr.GetNonTerminal(),termFollow,gr.GetStackOutput()));
+                    }
 
+                    if(Follow[gr.GetNonTerminal()].Contains("$"))
+                    {
+                        PredictAnalyzerTable.Add(new TransitionFunction(gr.GetNonTerminal(), "$", gr.GetStackOutput()));
+                    }
+                }
+            }
+            else if(TerminalsAlphabet.Contains(firstItem))
+            {
+                if (firstItem == "~")
+                {
+                    foreach (var termFollow in Follow[gr.GetNonTerminal()])
+                    {
+                        PredictAnalyzerTable.Add(new TransitionFunction(gr.GetNonTerminal(), termFollow, gr.GetStackOutput()));
+                    }
+                }
+                else
+                {
+                    PredictAnalyzerTable.Add(new TransitionFunction(gr.GetNonTerminal(), firstItem, gr.GetStackOutput()));
+                }
+            }
+        }
+    }
+
+    private void AddSync()
+    {
+        foreach (var nonTerm in NonTerminalsAlphabet)
+        {
+            foreach (var term in Follow[nonTerm])
+            {
+                if (PredictAnalyzerTable.Where(pa => pa.GetNonTerminal == nonTerm && pa.GetInputSymbol == term).Count() == 0)
+                {
+                    PredictAnalyzerTable.Add(new TransitionFunction(term, nonTerm, true));
+                }
+            }
+        }
     }
 }
