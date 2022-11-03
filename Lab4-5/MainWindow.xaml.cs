@@ -46,22 +46,47 @@ public partial class MainWindow : Window
 
     private void PrintErrors(PusdownAutomat pa)
     {
-        var inpText = TB_Program.Text.Replace("\r\n", "");
-        ErrorAnalyzer errorAnalyzer = pa.Execute(inpText);
+        var inpText = TB_Program.Text.Replace("\t", "");
+        ErrorAnalyzer errorAnalyzer = pa.Execute(TB_Program.Text);
+
+        for (int i = 0; i < errorAnalyzer.GetInput.Count; i++)
+        {
+            TB_Console.Text += "Stack: " + errorAnalyzer.GetStack[i] +
+                                " Input: " + errorAnalyzer.GetInput[i] +
+                                " Comment: " + errorAnalyzer.GetComment[i];
+            TB_Console.Text += "\n";
+        }
+
 
         if (errorAnalyzer.GetErrorPlace.Count == 0)
-            TB_Console.Text = "PROGRAM IS EXECUTABLE";
+            TB_Console.Text += "PROGRAM IS EXECUTABLE";
         else
         {
-            foreach(var line in errorAnalyzer.GetErrorPlace.Keys)
+            TB_Console.Text += $"Errors - {errorAnalyzer.GetErrorPlace.Count}\n";
+            foreach (var line in errorAnalyzer.GetErrorPlace.Keys)
             {
-                TB_Console.Text += $"Error in line {line}, place - ";
-                foreach(var pos in errorAnalyzer.GetErrorPlace[line])
+                TB_Console.Text += $"Error in line {line + 1}, place - ";
+                foreach (var pos in errorAnalyzer.GetErrorPlace[line])
                 {
-                    TB_Console.Text += $" {pos}";
+                    TB_Console.Text += $" {pos + 1}";
                 }
                 TB_Console.Text += "\n";
             }
         }
+
+        /*        if (errorAnalyzer.GetErrorPlace.Count == 0)
+                    TB_Console.Text = "PROGRAM IS EXECUTABLE";
+                else
+                {
+                    foreach (var line in errorAnalyzer.GetErrorPlace.Keys)
+                    {
+                        TB_Console.Text += $"Error in line {line}, place - ";
+                        foreach (var pos in errorAnalyzer.GetErrorPlace[line])
+                        {
+                            TB_Console.Text += $" {pos}";
+                        }
+
+                    }
+                }*/
     }
 }

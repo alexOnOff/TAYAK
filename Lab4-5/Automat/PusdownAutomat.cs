@@ -16,7 +16,7 @@ internal class PusdownAutomat
     public HashSet<GrammarRule> GrammarRules = new();
     public string _stackButton = "$";
 
-    private readonly string _startNonTerminal = "E";
+    private readonly string _startNonTerminal = "program";
 
     private Dictionary<string, HashSet<string>> First;
     private Dictionary<string, HashSet<string>> Follow;
@@ -259,21 +259,33 @@ internal class PusdownAutomat
         ErrorAnalyzer errorAnalyzer = new ErrorAnalyzer();
         inputLine += "$";
         var posCounter = 0;
-        //var curStackSymbol;
+        var lineCounter = 0;
+        string errorComment = "";
 
         while (inputLine.Length != 0)
         {
             var curStackSymbol = Stack.Pop();
             var curInput = SelectInputSubstring(inputLine);
+
+            if(curInput == "\r\n")
+            {
+                Stack.Push(curStackSymbol);
+                inputLine = inputLine.Remove(0, curInput.Length);
+                posCounter = 0;
+                lineCounter++;
+                continue;
+            }
+
             var tf = PredictAnalyzerTable.Where(pa => pa.GetInputSymbol == curInput && pa.GetNonTerminal == curStackSymbol);
             if(tf.Count() == 1)
             {
                 if(tf.First().GetIsSync)
                 {
-                    errorAnalyzer.AddErrorPlace(0, posCounter);
+                    errorAnalyzer.AddErrorPlace(lineCounter, posCounter);
                     inputLine = inputLine.Remove(0, curInput.Length);
                     posCounter += curInput.Length;
                     Stack.Push(curStackSymbol);
+                    errorComment = "Error.";
                 }
                 else
                 {
@@ -285,29 +297,32 @@ internal class PusdownAutomat
                         if (stackOutput[i] == "~") break;
                         Stack.Push(stackOutput[i]);
                     }
+                    errorComment = "Pop nonterminal.";
                 }
             }
             else if(curStackSymbol == curInput)
             {
                 inputLine = inputLine.Remove(0, curInput.Length);
                 posCounter += curInput.Length;
+                errorComment = "Pop terminal.";
             }
             else if(tf.Count() == 0)
             {
-                errorAnalyzer.AddErrorPlace(0, posCounter);
+                errorAnalyzer.AddErrorPlace(lineCounter, posCounter);
+                errorComment = "CRITICAL ERROR.";
+                errorAnalyzer.FillTableOnce(Stack, inputLine, errorComment);
                 return errorAnalyzer;
             }
             else if(tf.Count() > 1)
             {
                 System.Console.WriteLine("THERE ARE TOO MANY TFs");
-                errorAnalyzer.AddErrorPlace(0, posCounter);
+                errorAnalyzer.AddErrorPlace(lineCounter, posCounter);
+                errorComment = "CRITICAL ERROR.";
+                errorAnalyzer.FillTableOnce(Stack, inputLine, errorComment);
                 return errorAnalyzer;
             }
-
-           /* if(inputLine[0].ToString() == _stackButton && curStackSymbol == _stackButton)
-            {
-                break;
-            }*/
+            
+            errorAnalyzer.FillTableOnce(Stack, inputLine, errorComment);
         }
 
 
@@ -319,7 +334,7 @@ internal class PusdownAutomat
     {
         //ar len = 1;
         bool isEntry = false;
-
+        if (input.StartsWith("\r\n")) return "\r\n";
         for (int i = 1; i < input.Length; i++)
         {
             var curSub = input.Substring(0, i);
