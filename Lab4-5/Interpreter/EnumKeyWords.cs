@@ -1,11 +1,14 @@
 ﻿namespace Lab4_5.Interpreter;
 
-enum KeyWords
+enum EnumKeyWords
 {
+    Program,
+    Statement,
     If,
     For,
     Else,
     Print,
-    Scan
+    Scan,
+    Assign
 }
 
