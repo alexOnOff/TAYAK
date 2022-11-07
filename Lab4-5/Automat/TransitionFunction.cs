@@ -18,18 +18,18 @@ namespace Lab4_5.Automat
         private readonly bool IsSync;
         public bool GetIsSync { get { return IsSync; } }
 
-        public TransitionFunction( string _inpSymbol, string _stackSymbol, List<string> _stackOutSymbols)
+        public TransitionFunction( string _nonTerm, string _inpSymbol, List<string> _stackOutSymbols)
         {
             InputSymbol = _inpSymbol;
-            NonTerminal = _stackSymbol;
+            NonTerminal = _nonTerm;
             StackOutput = _stackOutSymbols;
             IsSync = false;
         }
 
-        public TransitionFunction(bool isSync)
+        public TransitionFunction(string _nonTerm, string _inpSymbol, bool isSync)
         {
-            InputSymbol = null;
-            NonTerminal = null;
+            InputSymbol = _inpSymbol;
+            NonTerminal = _nonTerm;
             StackOutput = null;
             IsSync = isSync;
         }

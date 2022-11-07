@@ -14,22 +14,21 @@ public partial class MainWindow : Window
     private void Button_Click(object sender, RoutedEventArgs e)
     {
         var grammarAnalyzer = new GrammarAnalyzer(TB_Grammar.Text);
+        PusdownAutomat pusdownAutomat;
         TB_Console.Text = "";
-        /* foreach (var line in grammarAnalyzer.GetInputGrammarLines()) 
-             TB_Console.Text += line;*/
 
-
-        if (!grammarAnalyzer.IsTextCorrect()) TB_Console.Text = "Incorrect grammar!";
+        if (!grammarAnalyzer.IsTextCorrect()) 
+            TB_Console.Text = "Incorrect grammar!";
         else
         {
-            AlphabetAnalyzer alphabetAnalyzer = new AlphabetAnalyzer(TB_Grammar.Text);
-            foreach(var str in alphabetAnalyzer.GetTerminalsAlphabet())
-            {
-                TB_Console.Text += str;
-                TB_Console.Text += '\n';
-            }
-            PusdownAutomat pusdownAutomat = CreatePA();
+            pusdownAutomat = CreatePA();
+            PrintErrors(pusdownAutomat);
         }
+
+
+        
+
+
     }
 
     private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -43,5 +42,51 @@ public partial class MainWindow : Window
         PusdownAutomat PA = new(alphabetAnalyzer.GetNonTerminalsAlphabet(), alphabetAnalyzer.GetTerminalsAlphabet(), TB_Grammar.Text);
 
         return PA;
+    }
+
+    private void PrintErrors(PusdownAutomat pa)
+    {
+        var inpText = TB_Program.Text.Replace("\t", "");
+        ErrorAnalyzer errorAnalyzer = pa.Execute(TB_Program.Text);
+
+        for (int i = 0; i < errorAnalyzer.GetInput.Count; i++)
+        {
+            TB_Console.Text += "Stack: " + errorAnalyzer.GetStack[i] +
+                                " Input: " + errorAnalyzer.GetInput[i] +
+                                " Comment: " + errorAnalyzer.GetComment[i];
+            TB_Console.Text += "\n";
+        }
+
+
+        if (errorAnalyzer.GetErrorPlace.Count == 0)
+            TB_Console.Text += "PROGRAM IS EXECUTABLE";
+        else
+        {
+            TB_Console.Text += $"Errors - {errorAnalyzer.GetErrorPlace.Count}\n";
+            foreach (var line in errorAnalyzer.GetErrorPlace.Keys)
+            {
+                TB_Console.Text += $"Error in line {line + 1}, place - ";
+                foreach (var pos in errorAnalyzer.GetErrorPlace[line])
+                {
+                    TB_Console.Text += $" {pos + 1}";
+                }
+                TB_Console.Text += "\n";
+            }
+        }
+
+        /*        if (errorAnalyzer.GetErrorPlace.Count == 0)
+                    TB_Console.Text = "PROGRAM IS EXECUTABLE";
+                else
+                {
+                    foreach (var line in errorAnalyzer.GetErrorPlace.Keys)
+                    {
+                        TB_Console.Text += $"Error in line {line}, place - ";
+                        foreach (var pos in errorAnalyzer.GetErrorPlace[line])
+                        {
+                            TB_Console.Text += $" {pos}";
+                        }
+
+                    }
+                }*/
     }
 }

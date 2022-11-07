@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Lab4_5.Analyzer;
+
 
 namespace Lab4_5.Automat;
 
@@ -14,7 +16,7 @@ internal class PusdownAutomat
     public HashSet<GrammarRule> GrammarRules = new();
     public string _stackButton = "$";
 
-    private readonly string _startNonTerminal = "E";
+    private readonly string _startNonTerminal = "program";
 
     private Dictionary<string, HashSet<string>> First;
     private Dictionary<string, HashSet<string>> Follow;
@@ -30,11 +32,16 @@ internal class PusdownAutomat
         NonTerminalsAlphabet = alpabet;
         TerminalsAlphabet = stackAlphabet;
         TerminalsAlphabet.Add("~");
+        TerminalsAlphabet.Add(" ");
         GrammarRules = SetGrammarRules(grammarText);
+        Stack = new();
+        Stack.Push(_stackButton);
+        Stack.Push(_startNonTerminal);
 
         SetFirst();
         SetFollow();
         SetPredictAnalyzerTable();
+        AddSync();
     }
 
     private HashSet<GrammarRule> SetGrammarRules(string grammarText)
@@ -192,23 +199,161 @@ internal class PusdownAutomat
   
     private void SetPredictAnalyzerTable()
     {
-        foreach(var nonterm in NonTerminalsAlphabet)
+        foreach(var gr in GrammarRules)
         {
-            foreach(var terminal in First[nonterm])
+            var firstItem = gr.GetStackOutput()[0];
+            if (NonTerminalsAlphabet.Contains(firstItem))
             {
+                foreach(var term in First[firstItem])
+                {
+                    if (term == "~") continue;
+                    PredictAnalyzerTable.Add(new TransitionFunction(gr.GetNonTerminal(), term, gr.GetStackOutput()));
+                }
 
+                if(First[firstItem].Contains("~"))
+                {
+                    foreach(var termFollow in Follow[gr.GetNonTerminal()])
+                    {
+                        PredictAnalyzerTable.Add(new TransitionFunction(gr.GetNonTerminal(),termFollow,gr.GetStackOutput()));
+                    }
+
+                    if(Follow[gr.GetNonTerminal()].Contains("$"))
+                    {
+                        PredictAnalyzerTable.Add(new TransitionFunction(gr.GetNonTerminal(), "$", gr.GetStackOutput()));
+                    }
+                }
             }
-        } 
-
-        foreach(var item in First)
-        {
-            foreach(var terminal in item.Value)
+            else if(TerminalsAlphabet.Contains(firstItem))
             {
-
-
-                PredictAnalyzerTable.Add(new TransitionFunction(item.Key, terminal,));
+                if (firstItem == "~")
+                {
+                    foreach (var termFollow in Follow[gr.GetNonTerminal()])
+                    {
+                        PredictAnalyzerTable.Add(new TransitionFunction(gr.GetNonTerminal(), termFollow, gr.GetStackOutput()));
+                    }
+                }
+                else
+                {
+                    PredictAnalyzerTable.Add(new TransitionFunction(gr.GetNonTerminal(), firstItem, gr.GetStackOutput()));
+                }
             }
         }
+    }
 
+    private void AddSync()
+    {
+        foreach (var nonTerm in NonTerminalsAlphabet)
+        {
+            foreach (var term in Follow[nonTerm])
+            {
+                if (PredictAnalyzerTable.Where(pa => pa.GetNonTerminal == nonTerm && pa.GetInputSymbol == term).Count() == 0)
+                {
+                    PredictAnalyzerTable.Add(new TransitionFunction(nonTerm, term, true));
+                }
+            }
+        }
+    }
+
+    public ErrorAnalyzer Execute(string inputLine)
+    { 
+        ErrorAnalyzer errorAnalyzer = new ErrorAnalyzer();
+        inputLine += "$";
+        var posCounter = 0;
+        var lineCounter = 0;
+        string errorComment = "";
+
+        while (inputLine.Length != 0)
+        {
+            var curStackSymbol = Stack.Pop();
+            var curInput = SelectInputSubstring(inputLine);
+
+            if(curInput == "\r\n")
+            {
+                Stack.Push(curStackSymbol);
+                inputLine = inputLine.Remove(0, curInput.Length);
+                posCounter = 0;
+                lineCounter++;
+                continue;
+            }
+
+            var tf = PredictAnalyzerTable.Where(pa => pa.GetInputSymbol == curInput && pa.GetNonTerminal == curStackSymbol);
+            if(tf.Count() == 1)
+            {
+                if(tf.First().GetIsSync)
+                {
+                    errorAnalyzer.AddErrorPlace(lineCounter, posCounter);
+                    inputLine = inputLine.Remove(0, curInput.Length);
+                    posCounter += curInput.Length;
+                    Stack.Push(curStackSymbol);
+                    errorComment = "Error.";
+                }
+                else
+                {
+                    var stackOutput = tf.First().GetStackOutput;
+
+                    //curStackSymbol = Stack.Pop();
+                    for (int i = stackOutput.Count() - 1; i >= 0 ; i--)
+                    {
+                        if (stackOutput[i] == "~") break;
+                        Stack.Push(stackOutput[i]);
+                    }
+                    errorComment = "Pop nonterminal.";
+                }
+            }
+            else if(curStackSymbol == curInput)
+            {
+                inputLine = inputLine.Remove(0, curInput.Length);
+                posCounter += curInput.Length;
+                errorComment = "Pop terminal.";
+            }
+            else if(tf.Count() == 0)
+            {
+                errorAnalyzer.AddErrorPlace(lineCounter, posCounter);
+                errorComment = "CRITICAL ERROR.";
+                errorAnalyzer.FillTableOnce(Stack, inputLine, errorComment);
+                return errorAnalyzer;
+            }
+            else if(tf.Count() > 1)
+            {
+                System.Console.WriteLine("THERE ARE TOO MANY TFs");
+                errorAnalyzer.AddErrorPlace(lineCounter, posCounter);
+                errorComment = "CRITICAL ERROR.";
+                errorAnalyzer.FillTableOnce(Stack, inputLine, errorComment);
+                return errorAnalyzer;
+            }
+            
+            errorAnalyzer.FillTableOnce(Stack, inputLine, errorComment);
+        }
+
+
+
+        return errorAnalyzer;
+    }
+
+    private string SelectInputSubstring(string input)
+    {
+        //ar len = 1;
+        bool isEntry = false;
+        if (input.StartsWith("\r\n")) return "\r\n";
+        for (int i = 1; i < input.Length; i++)
+        {
+            var curSub = input.Substring(0, i);
+            var count = TerminalsAlphabet.Where(ta => ta.StartsWith(curSub)).Count();
+
+
+            if (count == 1 && TerminalsAlphabet.Contains(curSub))
+            {
+                return curSub;
+            }
+            else if (count > 0)
+            {
+                isEntry = true;
+            }
+            else if (count == 0 && isEntry)
+            {
+                return input.Substring(0, i - 1);
+            }
+        }
+        return input;
     }
 }
