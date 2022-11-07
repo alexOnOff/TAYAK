@@ -192,7 +192,23 @@ internal class PusdownAutomat
   
     private void SetPredictAnalyzerTable()
     {
+        foreach(var nonterm in NonTerminalsAlphabet)
+        {
+            foreach(var terminal in First[nonterm])
+            {
 
+            }
+        } 
+
+        foreach(var item in First)
+        {
+            foreach(var terminal in item.Value)
+            {
+
+
+                PredictAnalyzerTable.Add(new TransitionFunction(item.Key, terminal,));
+            }
+        }
 
     }
 }
