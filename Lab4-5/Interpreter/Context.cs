@@ -24,4 +24,9 @@ internal class Context
             Variables.Add(name, value);
     }
 
+    public Dictionary<string, int> GetVariables()
+    {
+        return Variables;
+    }
+
 }

@@ -10,15 +10,21 @@ namespace Lab4_5.Interpreter;
 
 internal class Expression : IExpression
 {
-    private IExpression TermVar;
+    private Term TermVar;
     private Expression ExpressionVar;
     private char Operation;
 
-    public Expression(IExpression termVar, Expression expressionVar, char operation)
+    public Expression(Term termVar, Expression expressionVar, char operation)
     {
         TermVar = termVar;
         ExpressionVar = expressionVar;
         Operation = operation;
+    }
+
+    public Expression(Term term)
+    {
+        TermVar = term;
+        ExpressionVar = null;
     }
 
     public int Interpret(Context context)

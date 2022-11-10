@@ -20,17 +20,24 @@ internal class Term : IExpression
         ExpressionVar = expression;
         Operation = operation;
     }
+
+    public Term(Expression expression)
+    {
+        TermVar = null;
+        ExpressionVar = expression;
+    }
+
      // NEED FIX
     public int Interpret(Context context)
     {
         try
         {
-            if (ExpressionVar == null)
-                return TermVar.Interpret(context);
+            if (TermVar == null)
+                return ExpressionVar.Interpret(context);
             else if (Operation == '*')
-                return TermVar.Interpret(context) + ExpressionVar.Interpret(context);
+                return ExpressionVar.Interpret(context) + TermVar.Interpret(context);
             else if (Operation == '/')
-                return TermVar.Interpret(context) - ExpressionVar.Interpret(context);
+                return ExpressionVar.Interpret(context) - TermVar.Interpret(context);
             else
                 throw new Exception("Incorrect Operation Exception");
 
