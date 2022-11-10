@@ -27,7 +27,7 @@ internal class Term : IExpression
         ExpressionVar = expression;
     }
 
-     // NEED FIX
+     // NEED FIX FOR TERM
     public int Interpret(Context context)
     {
         try

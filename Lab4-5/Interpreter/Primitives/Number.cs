@@ -17,8 +17,7 @@ internal class Number : IExpression
         {
             if(Num == null)
             {
-                throw new Exception("Number is empty");
-                
+                throw new Exception("Number is empty");   
             }
             else return Num;
         }
