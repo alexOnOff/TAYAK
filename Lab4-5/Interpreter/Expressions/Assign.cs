@@ -8,8 +8,15 @@ internal class Assign : IExpression
     private Identifier Id;
     private Expression ExpressionVar;
 
+    public Assign(Identifier id, Expression expression)
+    {
+        Id = id;
+        ExpressionVar = expression;
+    }
+
     public int Interpret(Context context)
     {
-        throw new NotImplementedException();
+        context.SetVariable(Id.GetId(), ExpressionVar.Interpret(context));
+        return 0;
     }
 }

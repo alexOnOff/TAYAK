@@ -35,13 +35,19 @@ internal class GrammarAnalyzer : IAnalyzer
         DeleteSpaces(ref analyzingLine);
 
         if (!IsDividePartsCorrect(analyzingLine)) return false;
+        try
+        {
+            var leftPart = analyzingLine.Substring(0, analyzingLine.IndexOf(":"));
+            var rightPart = analyzingLine.Substring(analyzingLine.IndexOf(":") + 1, analyzingLine.Length - analyzingLine.IndexOf(":") - 1);
 
-        var leftPart = analyzingLine.Substring(0, analyzingLine.IndexOf(":"));
-        var rightPart = analyzingLine.Substring(analyzingLine.IndexOf(":") + 1, analyzingLine.Length - analyzingLine.IndexOf(":") - 1);
-
-        if (!IsLeftPartCorrect(leftPart) || 
-            !IsRightPartCorrect(rightPart)) 
+            if (!IsLeftPartCorrect(leftPart) ||
+                !IsRightPartCorrect(rightPart))
                 return false;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
 
         return true;
     }

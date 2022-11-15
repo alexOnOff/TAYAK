@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Lab4_5.Interfaces;
 
 namespace Lab4_5.Interpreter;
 
@@ -27,7 +21,6 @@ internal class Term : IExpression
         ExpressionVar = expression;
     }
 
-     // NEED FIX FOR TERM
     public int Interpret(Context context)
     {
         try
@@ -35,9 +28,9 @@ internal class Term : IExpression
             if (TermVar == null)
                 return ExpressionVar.Interpret(context);
             else if (Operation == '*')
-                return ExpressionVar.Interpret(context) + TermVar.Interpret(context);
+                return ExpressionVar.Interpret(context) * TermVar.Interpret(context);
             else if (Operation == '/')
-                return ExpressionVar.Interpret(context) - TermVar.Interpret(context);
+                return ExpressionVar.Interpret(context) / TermVar.Interpret(context);
             else
                 throw new Exception("Incorrect Operation Exception");
 
