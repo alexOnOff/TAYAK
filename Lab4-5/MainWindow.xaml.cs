@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using Lab4_5.Automat;
 using Lab4_5.Analyzer;
+using Lab4_5.Interpreter.Expressions;
 
 namespace Lab4_5;
 
@@ -40,7 +41,8 @@ public partial class MainWindow : Window
 
     private void ExecuteCode()
     {
-
+        CBASInterpreter interpreter = new(TB_Program.Text);
+        interpreter.Execute(TB_Console);
     }
 
     private PusdownAutomat CreatePA()
