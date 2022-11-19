@@ -20,10 +20,10 @@ internal class CBASInterpreter
         Operands= SetOperands();
     }
 
-    public void Execute(System.Windows.Controls.TextBox textBox)
+    public void Execute(ref System.Windows.Controls.TextBox textBox)
     {
         int i = 0;
-        var program = ParseProgram(Program, ref i, textBox);
+        var program = ParseProgram(Program, ref i,ref textBox);
     }
 
     private void AnalyzeProgram()
@@ -31,7 +31,7 @@ internal class CBASInterpreter
 
     }
 
-    private Statement ParseProgram(string line, ref int i, System.Windows.Controls.TextBox textBox)
+    private Statement ParseProgram(string line, ref int i,ref System.Windows.Controls.TextBox textBox)
     {
         Statement statement = null;
         bool isChangeBrackets = false;
@@ -39,6 +39,8 @@ internal class CBASInterpreter
         Stack<IExpression> expressions = new Stack<IExpression>();
         Statement? lastStatement;
 
+
+        textBox.Text = string.Empty;
         while (i < line.Length)
         {
             textBox.Text += GetNextItem(line, ref i) + "\n";
@@ -57,11 +59,12 @@ internal class CBASInterpreter
             {
                 if (curLine.Length == 1)
                 {
+                    i++;
                     return curLine;
                 }
                 else
                 {
-                    i--;
+                    //i--;
                     return curLine.Remove(curLine.Length - 1, 1);
                 }
                

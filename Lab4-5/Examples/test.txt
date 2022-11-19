@@ -8,3 +8,15 @@
 
 
 )id*+id
+
+int main(){} 
+
+
+
+void main ( ) 
+{
+    if ((a > b) or ((a > c) and (!(a == n))))
+    {
+         return 0 ;
+    } 
+}

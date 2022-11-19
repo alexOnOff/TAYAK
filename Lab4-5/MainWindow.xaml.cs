@@ -42,7 +42,7 @@ public partial class MainWindow : Window
     private void ExecuteCode()
     {
         CBASInterpreter interpreter = new(TB_Program.Text);
-        interpreter.Execute(TB_Console);
+        interpreter.Execute(ref TB_Console);
     }
 
     private PusdownAutomat CreatePA()

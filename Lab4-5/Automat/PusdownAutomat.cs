@@ -276,7 +276,7 @@ internal class PusdownAutomat
                 continue;
             }
 
-            var tf = PredictAnalyzerTable.Where(pa => pa.GetInputSymbol == curInput && pa.GetNonTerminal == curStackSymbol);
+            var tf = PredictAnalyzerTable.Where(pa => pa.GetInputSymbol == curInput && pa.GetNonTerminal == curStackSymbol).ToList();
             if(tf.Count() == 1)
             {
                 if(tf.First().GetIsSync)
