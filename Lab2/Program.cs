@@ -25,7 +25,7 @@ public static class Program
         automate.Determization();
         automate.PrintTransitionFunctions();
 
-        if (automate.IsExecutableForInputLine("ada"))
+        if (automate.IsExecutableForInputLine("aaaaaaaab"))
             Console.WriteLine("Is executable");
         else
             Console.WriteLine("Is NOT executable");
